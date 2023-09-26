@@ -153,6 +153,14 @@ class MiscTypeTests : MultiplexingTestBase
 
     #endregion
 
+
+    [Test]
+    public async Task ObjectArray()
+    {
+        await AssertTypeWrite(new object[] { (short)4, (long)5, 6 }, "{4,5,6}", "integer[]", NpgsqlDbType.Integer | NpgsqlDbType.Array, isDefault: false);
+        await AssertTypeWrite(new object[] { "text", "chars".ToCharArray(), 'c' }, "{text,chars,c}", "text[]", NpgsqlDbType.Text | NpgsqlDbType.Array, isDefault: false);
+    }
+
     [Test]
     public Task Int2Vector()
         => AssertType(new short[] { 4, 5, 6 }, "4 5 6", "int2vector", NpgsqlDbType.Int2Vector, isDefault: false);
