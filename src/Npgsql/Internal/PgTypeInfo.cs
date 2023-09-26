@@ -202,13 +202,12 @@ public class PgTypeInfo
             ThrowHelper.ThrowNotSupportedException($"Writing {Type} is not supported for this type info.");
 
         format = ResolveFormat(converter, out var bufferRequirements, formatPreference ?? PreferredFormat);
-        if (converter.IsDbNull(value))
+        writeState = null;
+        if (converter.IsDbNull(value, ref writeState))
         {
-            writeState = null;
             size = default;
             return null;
         }
-        writeState = null;
         var context = new SizeContext(format, bufferRequirements.Write);
         size = bufferRequirements.Write is { Kind: SizeKind.Exact } req ? req : converter.GetSize(context, value, ref writeState);
 
@@ -236,13 +235,12 @@ public class PgTypeInfo
         format = ResolveFormat(converter, out var bufferRequirements, formatPreference ?? PreferredFormat);
 
         // Given SQL values are effectively a union of T | NULL we support DBNull.Value to signify a NULL value for all types except DBNull in this api.
-        if (value is DBNull && Type != typeof(DBNull) || converter.IsDbNullAsObject(value))
+        writeState = null;
+        if (value is DBNull && Type != typeof(DBNull) || converter.IsDbNullAsObject(value, ref writeState))
         {
-            writeState = null;
             size = default;
             return null;
         }
-        writeState = null;
         var context = new SizeContext(format, bufferRequirements.Write);
         size = bufferRequirements.Write is { Kind: SizeKind.Exact } req ? req : converter.GetSizeAsObject(context, value, ref writeState);
 

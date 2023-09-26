@@ -71,7 +71,7 @@ abstract class CompositeFieldInfo
 
     public abstract void ReadDbNull(CompositeBuilder builder);
     public abstract ValueTask Read(bool async, CompositeBuilder builder, PgReader reader, CancellationToken cancellationToken = default);
-    public abstract bool IsDbNull(object instance);
+    public abstract bool IsDbNull(object instance, ref object? writeState);
     public abstract Size? GetSizeOrDbNull(DataFormat format, object instance, ref object? writeState);
     public abstract ValueTask Write(bool async, PgWriter writer, object instance, CancellationToken cancellationToken);
 }
@@ -163,10 +163,10 @@ sealed class CompositeFieldInfo<T> : CompositeFieldInfo
 
     public override bool IsDbNullable => Converter.IsDbNullable;
 
-    public override bool IsDbNull(object instance)
+    public override bool IsDbNull(object instance, ref object? writeState)
     {
         var value = _getter(instance);
-        return _asObject ? Converter.IsDbNullAsObject(value) : GetConverter<T>().IsDbNull(value);
+        return _asObject ? Converter.IsDbNullAsObject(value, ref writeState) : GetConverter<T>().IsDbNull(value, ref writeState);
     }
 
     public override Size? GetSizeOrDbNull(DataFormat format, object instance, ref object? writeState)

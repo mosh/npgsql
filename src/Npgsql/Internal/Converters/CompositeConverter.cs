@@ -166,7 +166,8 @@ sealed class CompositeConverter<T> : PgStreamingConverter<T> where T : notnull
             var field = _composite.Fields[i];
             writer.WriteAsOid(field.PgTypeId);
 
-            var (size, fieldState) = data?[i] ?? (field.IsDbNull(boxedInstance) ? -1 : field.BinaryReadRequirement, null);
+            object? fieldState = null;
+            (var size, fieldState) = data?[i] ?? (field.IsDbNull(boxedInstance, ref fieldState) ? -1 : field.BinaryReadRequirement, null);
 
             var length = size.Value;
             writer.WriteInt32(length);
